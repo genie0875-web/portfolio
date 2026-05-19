@@ -201,7 +201,7 @@ export function PortfolioView() {
             <div className="flex flex-col w-full bg-[#111111] min-h-screen">
               {selectedProject.detail_images && selectedProject.detail_images.length > 0 ? (
                 <div className="w-full flex justify-center overflow-hidden">
-                  <div className="flex flex-col items-center w-full gap-[40px] pt-[150px] pb-[100px]">
+                  <div key={selectedProject.id} className="flex flex-col items-center w-full gap-[40px] pt-[150px] pb-[100px]">
                     <div className="flex flex-col items-center max-w-[900px] w-full px-[40px] text-center gap-[16px]">
                       {/* ✅ whileInView → animate로 변경 */}
                       <motion.h2
