@@ -13,11 +13,13 @@ export function PortfolioView() {
   const [cols, setCols] = useState(5);
   const [selectedProject, setSelectedProject] = useState<Portfolio | null>(null);
   const [isDetailActive, setIsDetailActive] = useState(false);
+  const [animationKey, setAnimationKey] = useState(0); // ✅ 애니메이션 강제 리셋용
 
   const projects = portfolios;
 
   const handleItemClick = (proj: Portfolio) => {
     setSelectedProject(proj);
+    setAnimationKey((prev) => prev + 1); // ✅ 클릭마다 key 변경 → 애니메이션 재실행
     setIsDetailActive(true);
     setIsAutoScrolling(false);
     if (detailRef.current) detailRef.current.scrollTop = 0;
@@ -37,6 +39,7 @@ export function PortfolioView() {
       const found = portfolios.find((p) => p.id === selectedId);
       if (found) {
         setSelectedProject(found);
+        setAnimationKey((prev) => prev + 1);
         setIsDetailActive(true);
         setIsAutoScrolling(false);
       }
@@ -201,12 +204,12 @@ export function PortfolioView() {
             <div className="flex flex-col w-full bg-[#111111] min-h-screen">
               {selectedProject.detail_images && selectedProject.detail_images.length > 0 ? (
                 <div className="w-full flex justify-center overflow-hidden">
-                  <div key={selectedProject.id} className="flex flex-col items-center w-full gap-[40px] pt-[150px] pb-[100px]">
+                  {/* ✅ animationKey 변경 시 컨텐츠 전체 리마운트 → 애니메이션 재실행 */}
+                  <div key={animationKey} className="flex flex-col items-center w-full gap-[40px] pt-[150px] pb-[100px]">
                     <div className="flex flex-col items-center max-w-[900px] w-full px-[40px] text-center gap-[16px]">
-                      {/* ✅ whileInView → animate로 변경 */}
                       <motion.h2
                         initial={{ opacity: 0, y: 60 }}
-                        animate={isDetailActive ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
+                        animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.8 }}
                         className="text-[32px] md:text-[48px] font-[800] text-white tracking-[-1px]"
                       >
@@ -214,7 +217,7 @@ export function PortfolioView() {
                       </motion.h2>
                       <motion.p
                         initial={{ opacity: 0, y: 60 }}
-                        animate={isDetailActive ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
+                        animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.9 }}
                         className="text-[16px] md:text-[20px] leading-[1.8] text-[rgba(255,255,255,0.6)]"
                       >
@@ -225,7 +228,7 @@ export function PortfolioView() {
                       <div key={idx} className="w-full max-w-[1200px] px-[40px]">
                         <motion.img
                           initial={{ opacity: 0, y: 60 }}
-                          animate={isDetailActive ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
+                          animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.8 + idx * 0.1 }}
                           className="w-full h-auto rounded-[8px] object-cover shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
                           src={imgUrl}
