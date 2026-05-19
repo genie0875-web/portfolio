@@ -31,7 +31,6 @@ export function PortfolioView() {
     }, 800);
   };
 
-  // 홈에서 특정 프로젝트 클릭 시 자동 오픈
   useEffect(() => {
     const selectedId = (location.state as { selectedId?: string })?.selectedId;
     if (selectedId && portfolios.length > 0) {
@@ -204,20 +203,19 @@ export function PortfolioView() {
                 <div className="w-full flex justify-center overflow-hidden">
                   <div className="flex flex-col items-center w-full gap-[40px] pt-[150px] pb-[100px]">
                     <div className="flex flex-col items-center max-w-[900px] w-full px-[40px] text-center gap-[16px]">
+                      {/* ✅ whileInView → animate로 변경 */}
                       <motion.h2
                         initial={{ opacity: 0, y: 60 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                        viewport={{ once: true, margin: "-15%" }}
+                        animate={isDetailActive ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
+                        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.8 }}
                         className="text-[32px] md:text-[48px] font-[800] text-white tracking-[-1px]"
                       >
                         {selectedProject.title}
                       </motion.h2>
                       <motion.p
                         initial={{ opacity: 0, y: 60 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-                        viewport={{ once: true, margin: "-15%" }}
+                        animate={isDetailActive ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
+                        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.9 }}
                         className="text-[16px] md:text-[20px] leading-[1.8] text-[rgba(255,255,255,0.6)]"
                       >
                         {selectedProject.description}
@@ -227,9 +225,8 @@ export function PortfolioView() {
                       <div key={idx} className="w-full max-w-[1200px] px-[40px]">
                         <motion.img
                           initial={{ opacity: 0, y: 60 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                          viewport={{ once: true, margin: "-15%" }}
+                          animate={isDetailActive ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
+                          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.8 + idx * 0.1 }}
                           className="w-full h-auto rounded-[8px] object-cover shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
                           src={imgUrl}
                           alt={`${selectedProject.title} ${idx + 1}`}
