@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensuous Gallery - Portfolio Only</title>
+    <!-- Google Fonts 추가 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@100;200;300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* 기본 설정 및 리셋 */
+        :root {
+            --bg-color: #111111;
+            --text-color: #ffffff;
+            --cursor-color: #ffffff; 
+            --transition-ease: cubic-bezier(0.86, 0, 0.07, 1); 
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Albert Sans', 'Noto Sans KR', sans-serif;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 1. 커스텀 커서 */
+        #custom-cursor {
+            position: fixed;
+            top: 0; left: 0; width: 20px; height: 20px;
+            background-color: var(--cursor-color);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), height 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex; align-items: center; justify-content: center;
+            text-align: center; font-size: 12px; font-weight: bold; color: #fff; opacity: 0;
+        }
+        #custom-cursor.active { opacity: 1; }
+        #custom-cursor.hover-img { width: 60px; height: 60px; background-color: #ffffff; mix-blend-mode: difference; }
+
+        /* 헤더 (네비게이션) */
+        header {
+            position: fixed; top: 0; left: 0; width: 100%;
+            padding: 30px 40px; display: flex; justify-content: space-between;
+            z-index: 100; pointer-events: none;
+        }
+        .nav-item {
+            font-size: 12px; color: #fff; font-weight: 700;
+            letter-spacing: 2px; position: relative; padding-bottom: 6px;
+            pointer-events: auto; text-decoration: none; cursor: none;
+        }
+        .nav-item::after {
+            content: ''; position: absolute; bottom: 0; left: 0;
+            width: 0; height: 2px; background-color: #fff;
+            transition: width 0.4s var(--transition-ease);
+        }
+        .nav-item.active::after { width: 100%; }
+
+        .copyright {
+            position: fixed; bottom: 30px; left: 40px; font-size: 12px;
+            color: #ffffff; letter-spacing: 2px; font-weight: 700;
+            z-index: 100; pointer-events: none;
+        }
+
+        /* ----------------------------------
+           PORTFOLIO (메이슨리 갤러리 썸네일) 
+           ---------------------------------- */
+        .page-view {
+            opacity: 0; transition: opacity 0.4s ease;
+        }
+        .page-view.active-page {
+            opacity: 1; animation: fadeIn 0.4s ease forwards;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .gallery-wrapper { padding: 75px 40px 40px; min-height: 100vh; overflow: hidden; }
+        .masonry-grid { column-count: 4; column-gap: 20px; }
+        
+        @media (max-width: 1200px) { .masonry-grid { column-count: 3; } }
+        @media (max-width: 900px) { .masonry-grid { column-count: 2; } }
+        @media (max-width: 600px) { .masonry-grid { column-count: 1; } }
+
+        .gallery-item {
+            break-inside: avoid; margin-bottom: 20px; position: relative; overflow: hidden;
+            background-color: #222222; cursor: none; opacity: 0;
+        }
+
+        /* 상하 어긋남(Stagger) 정렬 애니메이션 */
+        #portfolio-view.active-page .gallery-item {
+            animation-duration: 2s;
+            animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+            animation-fill-mode: forwards;
+        }
+        #portfolio-view.active-page .gallery-item.slide-up { animation-name: slideFromBottom; }
+        #portfolio-view.active-page .gallery-item.slide-down { animation-name: slideFromTop; }
+
+        @keyframes slideFromBottom {
+            0% { transform: translateY(250px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slideFromTop {
+            0% { transform: translateY(-250px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .gallery-item img {
+            width: 100%; display: block; transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            object-fit: cover; will-change: transform;
+        }
+        .gallery-item:hover img { transform: scale(1.08); }
+
+        .gallery-item::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            border: 15px solid transparent; box-sizing: border-box;
+            transition: border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none; z-index: 10;
+        }
+        .gallery-item:hover::after { border-color: #000000; }
+
+        .item-overlay {
+            position: absolute; bottom: 0; left: 0; width: 100%; padding: 40px 20px 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+            color: #ffffff; display: flex; align-items: flex-end; pointer-events: none;
+        }
+        .item-text { font-size: 13px; line-height: 1.4; letter-spacing: -0.2px; font-family: 'Noto Sans KR', sans-serif;}
+        .item-title { font-weight: 700; font-family: 'Albert Sans', sans-serif;}
+        .item-desc { font-weight: 400; opacity: 0.85; }
+
+        /* ----------------------------------
+           상세 페이지 (Detail View)
+           ---------------------------------- */
+        #detail-view {
+            position: fixed; top: 100vh; left: 0; width: 100vw; height: 100vh;
+            background-color: var(--bg-color); z-index: 1000;
+            overflow-y: auto; overflow-x: hidden; transition: transform 0.8s var(--transition-ease);
+            will-change: transform;
+        }
+        #detail-view.active { transform: translateY(-100vh); }
+
+        .close-btn {
+            position: fixed; top: 30px; right: 30px; width: 50px; height: 50px;
+            background-color: #000; z-index: 1010; display: flex; justify-content: center; align-items: center;
+            border: 1px solid rgba(255,255,255,0.1); opacity: 0; pointer-events: none;
+            transition: background-color 0.3s ease, transform 0.3s ease, opacity 0.4s ease;
+        }
+        .close-btn.active { opacity: 1; pointer-events: auto; }
+        .close-btn.active:hover { background-color: #222; transform: scale(0.95); }
+        .chevron-down {
+            width: 16px; height: 16px; border-bottom: 2px solid #fff; border-right: 2px solid #fff;
+            transform: rotate(45deg); margin-bottom: 6px; pointer-events: none;
+        }
+
+        .detail-hero { width: 100%; height: 100vh; position: relative; }
+        .detail-hero img { width: 100%; height: 100%; object-fit: cover; }
+        .detail-content { padding: 150px 0; position: relative; background-color: var(--bg-color); }
+        
+        .content-inner { max-width: 900px; margin: 0 auto; padding: 50px 40px; font-size: 20px; line-height: 1.8; text-align: center; color: rgba(255,255,255,0.8); font-weight: 300; font-family: 'Noto Sans KR', sans-serif;}
+        .content-inner h2 { font-size: 48px; font-weight: 800; color: #fff; margin-bottom: 40px; letter-spacing: -1px; font-family: 'Albert Sans', sans-serif;}
+
+        .detail-image-container { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 40px; padding: 0 40px 100px; }
+        .detail-image-container img { width: 100%; max-width: 1200px; height: auto; border-radius: 8px; object-fit: cover; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); }
+        .full-width-img { width: 100vw !important; max-width: 100vw !important; border-radius: 0 !important; }
+
+        .fade-up-item { opacity: 0; transform: translateY(60px); transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1); will-change: opacity, transform; }
+        .fade-up-item.visible { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+    <!-- 커스텀 커서 -->
+    <div id="custom-cursor"></div>
+
+    <!-- 헤더 메뉴 -->
+    <header>
+        <a href="#" class="nav-item">ABOUT</a>
+        <a href="#" class="nav-item active">PORTFOLIO</a>
+    </header>
+
+    <div class="copyright">©2026</div>
+
+    <!-- PORTFOLIO (갤러리 페이지 - 시작부터 활성화) -->
+    <div id="portfolio-view" class="page-view active-page gallery-wrapper">
+        <div class="masonry-grid" id="gallery">
+            <!-- 자바스크립트로 동적 생성됨 -->
+        </div>
+    </div>
+
+    <!-- 닫기 버튼 (상세 페이지용) -->
+    <div class="close-btn" id="close-detail">
+        <div class="chevron-down"></div>
+    </div>
+
+    <!-- 상세 페이지 -->
+    <div id="detail-view">
+        <div class="detail-hero">
+            <img id="detail-hero-img" src="" alt="Hero">
+        </div>
+
+        <div class="detail-content">
+            <div class="content-inner">
+                <h2 class="fade-up-item">EXPERIENCE THE NEW EQL</h2>
+                <p class="fade-up-item">브랜드의 아이덴티티를 디지털 프로덕트와 융합하여 고객에게 전달합니다. EQL이 할 수 있는 콘텐츠와 상품의 끊임없는 소비 경험으로 고객이 원하는 트렌드를 이끌어갑니다.</p>
+            </div>
+            
+            <div class="detail-image-container">
+                <img class="fade-up-item" src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1600&auto=format&fit=crop" alt="Detail Content 1">
+                <img class="fade-up-item" src="https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=1600&auto=format&fit=crop" alt="Detail Content 2">
+                <img class="fade-up-item full-width-img" src="video2.jpg" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=1600&auto=format&fit=crop';" alt="Detail Content 3">
+                <img class="fade-up-item" src="https://images.unsplash.com/photo-1618761714954-0b8cd0026356?q=80&w=1600&auto=format&fit=crop" alt="Detail Content 4">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const projects = [
+            { id: 1, title: "ROGER VIVIER", desc: "Parisian Luxury meets digital elegance", tag: "", img: "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?q=80&w=800&h=1200&auto=format&fit=crop" },
+            { id: 2, title: "BLOOM & WOLF", desc: "Rebranding, content creation and a scalable e-commerce solution", tag: "Newly Added", img: "https://images.unsplash.com/photo-1563241527-20042cb36a33?q=80&w=800&h=1100&auto=format&fit=crop" },
+            { id: 3, title: "XBIONIC TERRASKIN", desc: "Launching the first trail running footwear system", tag: "Headless Shopify", img: "https://images.unsplash.com/photo-1556817411-31ae72fa3ea8?q=80&w=800&h=1300&auto=format&fit=crop" },
+            { id: 4, title: "AKRIS", desc: "Meticulous redesign & development of a sensual minimalist fashion house", tag: "Shopify", img: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800&h=1050&auto=format&fit=crop" },
+            { id: 5, title: "ARK8", desc: "Digital flagship store for a luxury streetwear brand", tag: "Shopify", img: "https://images.unsplash.com/photo-1523398002811-999aa8ec58d1?q=80&w=800&h=1250&auto=format&fit=crop" },
+            { id: 6, title: "BEYONCÉ", desc: "Digital experience", tag: "", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&h=1150&auto=format&fit=crop" },
+            { id: 7, title: "POLAROID I-2", desc: "Shoppable campaign site to launch the premium I-2 camera", tag: "Shopify", img: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?q=80&w=800&h=1350&auto=format&fit=crop" },
+            { id: 8, title: "BEACHWEAR", desc: "Summer collection", tag: "", img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800&h=1000&auto=format&fit=crop" },
+            { id: 9, title: "VITRA", desc: "Designing an engineering architecture", tag: "Most Awarded", img: "https://images.unsplash.com/photo-1505843490538-5133c6c7d0e1?q=80&w=800&h=1200&auto=format&fit=crop" },
+            { id: 10, title: "MAMMUT", desc: "Moved by mountains", tag: "", img: "https://images.unsplash.com/photo-1522163182402-834f871fd851?q=80&w=800&h=1100&auto=format&fit=crop" },
+            { id: 11, title: "ACE & TATE", desc: "Envisioning an omnichannel future", tag: "", img: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=800&h=1300&auto=format&fit=crop" },
+            { id: 12, title: "FOAM MUSEUM", desc: "Cultural platform all about photography", tag: "", img: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?q=80&w=800&h=1050&auto=format&fit=crop" },
+            { id: 13, title: "STUDIO JOB", desc: "Digital art piece for an artist", tag: "", img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&h=1250&auto=format&fit=crop" },
+            { id: 14, title: "KLARNA", desc: "Building an immersive platform", tag: "Fintech", img: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=800&h=1150&auto=format&fit=crop" },
+            { id: 15, title: "SECRID", desc: "A better world starts in your pocket", tag: "Shopify", img: "https://images.unsplash.com/photo-1627123424574-724758594e93?q=80&w=800&h=1350&auto=format&fit=crop" },
+            { id: 16, title: "LAND OF RIDE", desc: "Unfold the world of adventures", tag: "Shopify", img: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=800&h=1000&auto=format&fit=crop" }
+        ];
+
+        const gallery = document.getElementById('gallery');
+        
+        // 갤러리 렌더링
+        projects.forEach((proj, index) => {
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            
+            // 4개 단위로 컬럼을 계산하여 상하 교차 애니메이션 클래스 부여 (4단 기준)
+            if ((index % 8) < 4) {
+                item.classList.add('slide-up');
+            } else {
+                item.classList.add('slide-down');
+            }
+
+            item.innerHTML = `
+                <img src="${proj.img}" alt="${proj.title}" onerror="this.closest('.gallery-item').remove()">
+                <div class="item-overlay">
+                    <div class="item-text">
+                        <span class="item-title">${proj.title}</span> &middot; <span class="item-desc">${proj.desc}</span>
+                    </div>
+                </div>
+            `;
+            gallery.appendChild(item);
+        });
+
+        // --- 커스텀 커서 애니메이션 ---
+        const cursor = document.getElementById('custom-cursor');
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let cursorX = mouseX;
+        let cursorY = mouseY;
+        
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            if(!cursor.classList.contains('active')) cursor.classList.add('active');
+        });
+
+        function animateCursor() {
+            let dx = mouseX - cursorX;
+            let dy = mouseY - cursorY;
+            cursorX += dx * 0.15;
+            cursorY += dy * 0.15;
+            cursor.style.transform = `translate3d(${cursorX}px, ${cursorY}px, 0) translate(-50%, -50%)`;
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            item.addEventListener('mouseenter', () => cursor.classList.add('hover-img'));
+            item.addEventListener('mouseleave', () => cursor.classList.remove('hover-img'));
+        });
+
+        document.querySelectorAll('.nav-item, .close-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', () => cursor.style.transform += ' scale(0.5)');
+            btn.addEventListener('mouseleave', () => cursor.style.transform = cursor.style.transform.replace(' scale(0.5)', ''));
+        });
+
+        // --- 자동 스크롤 제어 ---
+        let isAutoScrolling = false;
+        let autoScrollSpeed = 0.35; 
+        let userScrollTimeout;
+        const detailView = document.getElementById('detail-view');
+
+        // 페이지 진입 후 애니메이션이 끝나는 시점(약 3초 뒤)에 자동스크롤 시작
+        setTimeout(() => {
+            isAutoScrolling = true;
+        }, 3000);
+
+        function autoScroll() {
+            if (isAutoScrolling && !detailView.classList.contains('active')) {
+                window.scrollBy(0, autoScrollSpeed);
+                if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 5) {
+                    window.scrollTo(0, 0); // 바닥에 닿으면 처음으로
+                }
+            }
+            requestAnimationFrame(autoScroll);
+        }
+        setTimeout(() => autoScroll(), 1000);
+
+        const pauseAutoScroll = () => {
+            isAutoScrolling = false;
+            clearTimeout(userScrollTimeout);
+            userScrollTimeout = setTimeout(() => {
+                isAutoScrolling = true;
+            }, 2500);
+        };
+
+        window.addEventListener('wheel', pauseAutoScroll, {passive: true});
+        window.addEventListener('touchmove', pauseAutoScroll, {passive: true});
+
+        // --- 상세 페이지 트랜지션 및 페이드 업 ---
+        const detailHeroImg = document.getElementById('detail-hero-img');
+        const closeBtn = document.getElementById('close-detail');
+
+        const fadeUpItems = document.querySelectorAll('.fade-up-item');
+        const observerOptions = { root: detailView, threshold: 0.15 };
+        
+        const detailObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, observerOptions);
+
+        fadeUpItems.forEach(item => detailObserver.observe(item));
+
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                detailHeroImg.src = item.querySelector('img').src;
+                detailView.scrollTop = 0;
+                detailView.classList.add('active');
+                closeBtn.classList.add('active');
+            });
+        });
+
+        closeBtn.addEventListener('click', () => {
+            detailView.classList.remove('active');
+            closeBtn.classList.remove('active');
+            setTimeout(() => { fadeUpItems.forEach(item => item.classList.remove('visible')); }, 800);
+        });
+
+    </script>
+</body>
+</html>

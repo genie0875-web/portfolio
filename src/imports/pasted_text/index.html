@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensuous Gallery - Interactive Experience</title>
+    <!-- Google Fonts 추가 (Albert Sans Thin(100) 추가 로드) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@100;200;300;400;500;600;700;800;900&family=Beau+Rivage&family=Licorice&family=Noto+Sans+KR:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* 기본 설정 및 리셋 */
+        :root {
+            --bg-color: #111111; /* 배경색을 이미지와 유사한 다크 그레이로 변경 */
+            --text-color: #ffffff;
+            --accent-color: #e0d4c8;
+            --cursor-color: #ff3b00; /* 메인 컬러에 맞추어 커서 색상 변경 */
+            --transition-ease: cubic-bezier(0.86, 0, 0.07, 1); 
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none;
+        }
+
+        /* 가로 스크롤 방지 (스크롤 스냅 충돌 방지를 위해 html로 이동) */
+        html {
+            overflow-x: hidden;
+        }
+
+        /* --- 스크롤 스냅 전역 클래스 추가 --- */
+        html.snap-scroll {
+            scroll-snap-type: y mandatory;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Albert Sans', 'Noto Sans KR', sans-serif; /* 기본 폰트 변경 */
+            /* overflow-x: hidden; (위로 이동) */
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 1. 커스텀 커서 */
+        #custom-cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            background-color: var(--cursor-color);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), height 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            opacity: 0;
+        }
+
+        #custom-cursor.active { opacity: 1; }
+        #custom-cursor.hover-img { width: 60px; height: 60px; background-color: #ffffff; mix-blend-mode: difference; }
+
+        /* 헤더 (네비게이션) */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 30px 40px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .nav-item {
+            font-size: 12px; /* 14px에서 12px로 2px 감소 */
+            color: #fff;
+            font-weight: 700;
+            letter-spacing: 2px;
+            position: relative;
+            padding-bottom: 6px;
+            pointer-events: auto;
+        }
+
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #fff;
+            transition: width 0.4s var(--transition-ease);
+        }
+
+        .nav-item.active::after {
+            width: 100%;
+        }
+
+        /* 페이지 컨테이너 전환 애니메이션 */
+        .page-view {
+            display: none !important;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .page-view.active-page {
+            display: block !important;
+            opacity: 1;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ----------------------------------
+           ABOUT (메인 페이지 - 패럴랙스 적용 제거) 
+           ---------------------------------- */
+        #home-view {
+            width: 100vw;
+            background: var(--bg-color);
+        }
+
+        /* 세로 번호 네비게이션 (Scrollspy) */
+        .vertical-nav {
+            position: fixed;
+            right: 40px; 
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 20px; 
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            align-items: flex-end; 
+        }
+
+        #home-view.active-page .vertical-nav {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .nav-dot {
+            display: flex;
+            flex-direction: column; 
+            align-items: flex-end; 
+            position: relative;
+            color: #555;
+            padding: 5px 0;
+            cursor: pointer;
+        }
+
+        .nav-dot .num {
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .nav-dot .label {
+            font-size: 11px;
+            font-weight: bold;
+            color: #fff;
+            opacity: 0;
+            max-height: 0; 
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            white-space: nowrap;
+            margin-top: 0;
+        }
+
+        .nav-dot.active .num { color: #fff; }
+        .nav-dot.active .label {
+            opacity: 1;
+            max-height: 20px; 
+            margin-top: 4px; 
+        }
+
+        /* 홈 섹션 공통 스타일 */
+        .home-section {
+            min-height: 100vh;
+            padding: 100px 150px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            
+            /* --- 스크롤 스냅 속성 추가 --- */
+            scroll-snap-align: start; /* 각 섹션의 시작 부분에 스냅 */
+            scroll-snap-stop: always; /* 한 번 스크롤에 무조건 한 섹션씩 멈춤 */
+        }
+
+        @media (max-width: 768px) {
+            .home-section { padding: 100px 40px; }
+            .vertical-nav { display: none; }
+        }
+
+        /* ----- 첫 번째 섹션 (Hero) 디자인 적용 ----- */
+        .hero-section {
+            position: relative;
+            padding: 0 !important; 
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-content {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* 모든 요소를 좌측으로 정렬 */
+            z-index: 10;
+        }
+
+        .hero-top-text {
+            margin-top: -50px; /* 요청에 따라 20px 추가 이동 (총 -50px) */
+            margin-bottom: 70px; /* 라인과 텍스트 사이 간격 70px */
+        }
+
+        /* 페이드 인 업 애니메이션 정의 */
+        @keyframes heroFadeInUp {
+            0% { opacity: 0; transform: translateY(40px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-top-text h2 {
+            font-family: 'Albert Sans', sans-serif;
+            font-size: 34px;
+            font-weight: 700;
+            line-height: 0.9; /* 행간 90% */
+            color: #ffffff;
+            margin: 0;
+            letter-spacing: 1px;
+            
+            /* 기본 상태에서는 숨기기만 적용 (애니메이션 제거) */
+            opacity: 0;
+        }
+
+        .hero-section.is-visible .hero-top-text h2 {
+            animation: heroFadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: 0.1s;
+        }
+
+        .hero-top-text .line {
+            width: 60px;
+            height: 1px;
+            background-color: #ffffff;
+            margin-top: 25px;
+            
+            /* 기본 상태에서는 숨기기만 적용 */
+            opacity: 0;
+        }
+
+        .hero-section.is-visible .hero-top-text .line {
+            animation: heroFadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: 0.2s;
+        }
+
+        .hero-center-wrapper {
+            position: relative;
+        }
+
+        .bg-text {
+            font-family: 'Albert Sans', sans-serif;
+            font-size: 170px;
+            font-weight: 900;
+            line-height: 0.8; /* 시안과 시각적으로 동일한 간격을 위해 조정 */
+            color: #333333;
+            margin: 0;
+            text-align: left;
+            letter-spacing: -2px;
+            
+            /* 기본 상태에서는 숨기기만 적용 */
+            opacity: 0;
+        }
+
+        .hero-section.is-visible .bg-text {
+            animation: heroFadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: 0.3s;
+        }
+
+        .fg-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Licorice', cursive;
+            font-size: 260px;
+            font-weight: 400; /* 명시적 굵기 적용 */
+            color: #ff3b00; /* 오렌지색 포인트 컬러 */
+            margin: 0;
+            pointer-events: none;
+            white-space: nowrap;
+            margin-top: -10px; /* Designer 텍스트 세로 중앙 미세 조정 */
+            
+            /* 글씨 쓰는 애니메이션 초기 상태 (숨김) - 끝부분이 잘리지 않도록 여유 공간 대폭 확대 */
+            clip-path: inset(-30% 100% -30% -30%);
+        }
+
+        .hero-section.is-visible .fg-text {
+            animation: write-effect 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation-delay: 0.8s;
+        }
+
+        @keyframes write-effect {
+            0% { 
+                clip-path: inset(-30% 100% -30% -30%); 
+            }
+            100% { 
+                /* 필기체의 꼬리가 긴 우측 여백을 -50%까지 넉넉하게 주어 글씨 끝부분 잘림 완벽 방지 */
+                clip-path: inset(-30% -50% -30% -30%); 
+            }
+        }
+
+        .hero-bottom-text {
+            color: #ff3b00;
+            font-size: 16px;
+            line-height: 1.6;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 500;
+            margin-top: 35px;
+            letter-spacing: -0.5px;
+            
+            /* 기본 상태에서는 숨기기만 적용 */
+            opacity: 0;
+        }
+
+        .hero-section.is-visible .hero-bottom-text {
+            animation: heroFadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: 0.4s;
+        }
+
+        .copyright {
+            position: fixed; /* absolute에서 fixed로 변경하여 화면에 고정 */
+            bottom: 30px;
+            left: 40px;
+            font-size: 12px;
+            color: #ffffff;
+            letter-spacing: 2px;
+            font-weight: 700;
+            z-index: 100; /* 다른 요소들 위로 올라오도록 z-index 증가 */
+            pointer-events: none; /* 마우스 클릭을 방해하지 않도록 설정 */
+        }
+
+        /* 영문 폰트 기본 적용 */
+        .nav-item, .num, .label, .section-title, .section-subtitle, .link-text, h3, p {
+            font-family: 'Albert Sans', sans-serif;
+        }
+        
+        /* 한국어 설명문구 폰트 */
+        .section-desc, .item-text, .content-inner p {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        /* 해상도에 따른 타이포그래피 스케일링 (1200px 강제축소 제거, 모바일에서만 축소) */
+        @media (max-width: 768px) {
+            .bg-text { font-size: 20vw; line-height: 0.85; }
+            .fg-text { font-size: 28vw; }
+            .hero-top-text h2 { font-size: 24px; }
+            .hero-bottom-text { font-size: 14px; }
+            .copyright { bottom: 20px; left: 20px; }
+        }
+
+        .section-subtitle {
+            font-size: 14px;
+            color: #c88846; 
+            margin-bottom: 20px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .section-title {
+            font-size: 5vw;
+            font-weight: 800;
+            letter-spacing: -2px;
+            line-height: 1.1;
+            margin-bottom: 30px;
+            max-width: 800px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .section-desc {
+            font-size: 18px;
+            color: #888;
+            max-width: 500px;
+            line-height: 1.6;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ----- 세 번째 섹션 (Selected Work / Portfolio Collage) ----- */
+        .sw-section {
+            position: relative;
+            padding: 0 !important;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-color);
+        }
+
+        .sw-wrapper {
+            position: relative;
+            width: 1200px;
+            height: 800px;
+            transform-origin: center;
+        }
+
+        .sw-header {
+            position: absolute;
+            top: -20px; /* 전체 그룹 세로 중앙 맞춤을 위해 이동 (+60px) */
+            left: 120px; /* 전체 그룹 가로 중앙 맞춤을 위해 이동 (+70px) */
+            z-index: 20;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .sw-section.is-visible .sw-header {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .sw-header h2 {
+            font-family: 'Albert Sans', sans-serif;
+            font-size: 34px;
+            font-weight: 700;
+            line-height: 0.9;
+            color: #ffffff;
+            margin: 0;
+            letter-spacing: 2px;
+        }
+
+        .sw-header .line {
+            width: 50px;
+            height: 1px;
+            background-color: #ffffff;
+            margin-top: 20px;
+        }
+
+        .sw-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .sw-year {
+            font-family: 'Albert Sans', sans-serif;
+            font-size: 20px; 
+            font-weight: 500;
+            color: #ffffff;
+            letter-spacing: 2px;
+            position: absolute;
+            top: 220px; /* 그룹 세로 중앙 맞춤 (+60px) */
+            left: 240px; /* 그룹 가로 중앙 맞춤 (+70px) */
+            z-index: 40; 
+            opacity: 0;
+            transition: opacity 0.8s ease 0.3s;
+        }
+
+        .sw-section.is-visible .sw-year {
+            opacity: 1;
+        }
+
+        .sw-title-script {
+            position: absolute;
+            top: calc(50% - 70px); /* 그룹 세로 중앙 맞춤 (+60px) */
+            left: 120px; /* 그룹 가로 중앙 맞춤 (+70px) */
+            transform: translateY(-50%); 
+            font-family: 'Licorice', cursive;
+            font-size: 280px; 
+            color: #ff3b00;
+            margin: 0;
+            line-height: 0.7;
+            font-weight: 400;
+            white-space: nowrap;
+            z-index: 30;
+            transform-origin: left center; 
+            
+            /* 기존 opacity, transition 제거하고 글씨 쓰는 애니메이션 초기 상태 적용 */
+            clip-path: inset(-30% 100% -30% -30%);
+        }
+
+        .sw-title-script .ortfolio {
+            font-size: 260px; 
+            letter-spacing: 0.03em; 
+        }
+
+        .sw-section.is-visible .sw-title-script {
+            /* 이미지 애니메이션(0.2s~0.6s 시작)의 한가운데 즈음인 0.6초 시점에 텍스트 쓰기 시작 */
+            animation: write-effect 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation-delay: 0.6s; /* 기존 1.4s에서 0.6s로 단축 */
+        }
+
+        /* 콜라주 이미지 공통 */
+        .sw-img {
+            position: absolute;
+            border-radius: 20px;
+            object-fit: cover;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            opacity: 0;
+            transform: translateY(60px);
+            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
+            pointer-events: auto; 
+        }
+
+        .sw-section.is-visible .sw-img {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 시안과 동일한 간격을 유지하며 전체 그룹을 중앙으로 이동 (+70px, +60px) */
+        
+        /* Img 1: 상단 중앙 */
+        .sw-img.img-1 { 
+            width: 272px; height: 378px; 
+            left: 540px; top: 120px; 
+            z-index: 5; 
+            transition-delay: 0.2s;
+        }
+        /* Img 2: 우측 중앙 목업 */
+        .sw-img.img-2 { 
+            width: 272px; height: 280px; 
+            left: 842px; top: 380px; 
+            z-index: 5; 
+            border-radius: 30px; 
+            transition-delay: 0.3s;
+        }
+        /* Img 3: 좌측 하단 작은 흑백 */
+        .sw-img.img-3 { 
+            width: 180px; height: 110px; 
+            left: 98px; top: 620px; 
+            z-index: 15; 
+            border-radius: 15px; 
+            transition-delay: 0.4s;
+        }
+        /* Img 4: 중앙 좌측 하단 오렌지 */
+        .sw-img.img-4 { 
+            width: 272px; height: 378px; 
+            left: 238px; top: 490px; 
+            z-index: 15; 
+            transition-delay: 0.5s;
+        }
+        /* Img 5: 중앙 우측 하단 파랑 */
+        .sw-img.img-5 { 
+            width: 272px; height: 292px; 
+            left: 540px; top: 528px; 
+            z-index: 15; 
+            transition-delay: 0.6s;
+        }
+
+        .sw-img:hover { transform: scale(1.05) translateY(-10px) !important; z-index: 25 !important; cursor: pointer; }
+
+        /* View Portfolio 링크 */
+        .sw-link {
+            position: absolute;
+            left: 842px; /* img-2 라인에 맞춤 (+70px) */
+            top: 690px; /* img-2 바닥에서 30px 띄움 (+60px) */
+            color: #ffffff;
+            font-family: 'Albert Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 400;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 20;
+            opacity: 0;
+            pointer-events: auto;
+            transition: color 0.3s, opacity 0.8s ease 0.7s;
+        }
+
+        .sw-section.is-visible .sw-link {
+            opacity: 1;
+        }
+
+        .sw-link:hover { color: var(--cursor-color); }
+        .sw-link::after { content: '⟶'; font-size: 20px; font-weight: 300; transition: transform 0.3s; }
+        .sw-link:hover::after { transform: translateX(8px); }
+
+        /* 해상도에 따른 캔버스 전체 스케일링 (가운데 정렬 유지하며 줄어듦) */
+        @media (max-width: 1300px) { .sw-wrapper { transform: scale(0.85); } }
+        @media (max-width: 1024px) { .sw-wrapper { transform: scale(0.65); } }
+        @media (max-width: 768px) { .sw-wrapper { transform: scale(0.45); } }
+        @media (max-width: 480px) { .sw-wrapper { transform: scale(0.3); } }
+
+        /* ----- 네 번째 섹션 (Contact) 디자인 적용 ----- */
+        .contact-section {
+            padding: 50px 0 150px !important; /* 상단 패딩을 150px에서 50px로 줄여 전체 그룹을 100px 위로 이동 */
+            height: auto;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background-color: var(--bg-color);
+        }
+
+        .contact-container {
+            width: 100%;
+            max-width: 850px; /* 140px 텍스트 길이에 맞춰 너비 확장 */
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            /* 기존 text-align: left 제거 */
+        }
+
+        .contact-section.is-visible .contact-container {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .contact-header {
+            /* 핵심 정렬 트릭: DO YOU 단어의 너비에 맞춰 컨테이너를 제한하고 중앙 정렬 */
+            max-width: 460px; /* 120px 폰트 크기에 맞춰 기존 540px에서 460px로 조정 */
+            margin: 0 auto 70px auto; 
+            text-align: left; 
+            position: relative;
+            left: 10px; /* 전체 그룹을 오른쪽으로 10px 이동 */
+        }
+
+        .contact-header h2 {
+            font-family: 'Albert Sans', sans-serif;
+            font-size: 34px;
+            font-weight: 700;
+            line-height: 1.1;
+            color: #ffffff;
+            margin: 0;
+            letter-spacing: 2px;
+        }
+
+        .contact-header .line {
+            width: 50px;
+            height: 1px;
+            background-color: #ffffff;
+            margin-top: 20px;
+        }
+
+        .contact-hero {
+            position: relative;
+            text-align: center; /* 영문 타이포를 다시 시안처럼 가운데 정렬 */
+            margin-bottom: 50px; /* 기존 100px에서 50px로 변경하여 한글 텍스트와의 간격 조정 */
+            user-select: none;
+        }
+
+        .bg-text-contact {
+            font-family: 'Albert Sans', sans-serif;
+            font-size: 120px; /* 기존 140px에서 120px로 변경 */
+            font-weight: 900;
+            line-height: 0.8; 
+            color: #333333;
+            margin: 0;
+            letter-spacing: -2px;
+            text-align: center;
+        }
+
+        .fg-text-contact {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Licorice', cursive;
+            font-size: 260px; /* Designer와 동일한 사이즈 */
+            font-weight: 400; /* Designer와 동일한 명시적 굵기 */
+            color: #ff3b00;
+            margin: 0;
+            white-space: nowrap;
+            pointer-events: none;
+            margin-top: -10px;
+            
+            /* 글씨 쓰는 애니메이션 초기 상태 적용 */
+            clip-path: inset(-30% 100% -30% -30%);
+        }
+
+        .contact-section.is-visible .fg-text-contact {
+            animation: write-effect 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation-delay: 0.5s;
+        }
+
+        .contact-body {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 15px;
+            line-height: 1.8;
+            color: #d1d1d1;
+            
+            /* 핵심 정렬 트릭: WANT? 단어의 너비와 동일하게 컨테이너를 맞추고 중앙 정렬 */
+            max-width: 400px; /* 120px 폰트 크기에 맞춰 기존 470px에서 400px로 조정 */
+            margin: 0 auto; 
+            text-align: left; 
+        }
+
+        .contact-body p {
+            margin-bottom: 30px;
+            letter-spacing: -0.3px;
+            white-space: nowrap; /* 400px 너비를 넘어가도 글자가 강제로 줄바꿈('다' 떨어짐) 되지 않도록 설정 */
+        }
+
+        .contact-body .highlight {
+            color: #ff3b00;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        .contact-body .highlight.mt-x {
+            margin-top: 60px;
+        }
+
+        .email-link {
+            display: inline-block;
+            color: #d1d1d1;
+            font-size: 16px;
+            text-decoration: none;
+            border-bottom: 1px solid #d1d1d1;
+            padding-bottom: 3px;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .email-link:hover {
+            color: #ff3b00;
+            border-color: #ff3b00;
+        }
+
+        @media (max-width: 1024px) {
+            .bg-text-contact { font-size: 90px; }
+            .fg-text-contact { font-size: 200px; }
+        }
+        @media (max-width: 768px) {
+            .contact-section { padding: 50px 40px 100px !important; } /* 모바일 환경에서도 위로 이동되도록 여백 조정 */
+            .bg-text-contact { font-size: 14vw; }
+            .fg-text-contact { font-size: 28vw; }
+            .contact-body { font-size: 14px; }
+            .contact-body p { white-space: normal; word-break: keep-all; } /* 모바일에서는 화면 밖으로 텍스트가 나가지 않게 줄바꿈 허용 */
+        }
+
+        /* ----- 두 번째 섹션 (Career) 디자인 적용 ----- */
+        .career-section {
+            position: relative;
+            padding: 0 !important; 
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .career-content {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            z-index: 10;
+            width: max-content; /* 100%에서 max-content로 변경하여 블록 전체가 화면 중앙에 오도록 설정 */
+            max-width: 100vw; /* 가로 스크롤 방지 */
+            padding: 0 40px;
+        }
+
+        .career-top-text {
+            margin-top: -50px; /* 요청에 따라 20px 추가 이동 (총 -50px) */
+            margin-bottom: 100px; /* 라인과 16 / 08 숫자 사이 간격을 100px로 넓힘 */
+            margin-left: 65px; /* 2000-2016 텍스트 그룹의 시작 여백(65px)과 동일하게 맞춰 왼쪽 라인 정렬 */
+        }
+
+        .career-top-text h2 {
+            font-family: 'Albert Sans', sans-serif;
+            font-size: 34px;
+            font-weight: 700;
+            line-height: 0.9;
+            color: #ffffff;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .career-top-text .line {
+            width: 60px;
+            height: 1px;
+            background-color: #ffffff;
+            margin-top: 25px;
+        }
+
+        .career-middle-wrapper {
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start; /* 기존 center에서 flex-start로 변경하여 왼쪽 정렬 */
+            width: 100%;
+            gap: 80px; 
+        }
+
+        .career-block {
+            position: relative;
+            width: 260px; /* 숫자와 텍스트를 담는 기준 너비 */
+        }
+
+        .number-bg {
+            position: absolute;
+            top: 0;
+            left: -15px; /* 폰트 기본 여백 보정 */
+            font-family: 'Beau Rivage', cursive; 
+            font-size: 230px; 
+            color: #ff3b00; 
+            line-height: 0.72; 
+            margin: 0;
+            padding: 0;
+            z-index: 1;
+            pointer-events: none; 
+            letter-spacing: -0.05em; 
+            
+            /* 글씨 쓰는 애니메이션 초기 상태 (숨김) */
+            clip-path: inset(-30% 100% -30% -30%);
+        }
+
+        /* 16 숫자 애니메이션 */
+        .career-section.is-visible .career-block:nth-child(1) .number-bg {
+            animation: write-effect 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation-delay: 0.3s;
+        }
+
+        /* 08 숫자 애니메이션 (16보다 약간 늦게 시작) */
+        .career-section.is-visible .career-block:nth-child(3) .number-bg {
+            animation: write-effect 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation-delay: 0.7s;
+        }
+
+        .text-group {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* 연도 텍스트와 하위 리스트를 완벽하게 왼쪽 정렬 */
+            padding-top: 72px; /* 연도 텍스트가 숫자의 세로 중앙에 오도록 상단 여백 설정 */
+        }
+
+        /* 16 영역 텍스트 그룹 (기존 65px) */
+        .text-group.group-16 {
+            padding-left: 65px; 
+        }
+
+        /* 08 영역 텍스트 그룹 (기존 85px) */
+        .text-group.group-08 {
+            padding-left: 85px; 
+        }
+
+        .year-text {
+            font-family: 'Albert Sans', sans-serif;
+            font-size: 20px;
+            font-weight: 500;
+            color: #ffffff;
+            letter-spacing: 1px;
+            white-space: nowrap; /* 줄바꿈 방지 */
+            margin-bottom: 110px; /* 16 텍스트 하단과 리스트 사이의 40px 간격을 유지하기 위한 마진 */
+        }
+
+        .slash {
+            font-family: 'Albert Sans', sans-serif; /* 폰트를 Albert Sans로 적용 */
+            font-size: 160px;
+            font-weight: 100; /* Thin(100) 굵기 적용으로 가장 얇게 변경 */
+            color: #ff3b00;
+            line-height: 1.1;
+            margin-top: 0px; /* 기존 10px에서 0px로 변경하여 10px 더 위로 이동 */
+        }
+
+        .career-list {
+            margin-top: 50px; /* 기존 0에서 50px로 변경하여 하단 리스트 전체를 아래로 이동 */
+            padding-left: 0; /* 기존에 있던 padding-left 제거 (자동 왼쪽 정렬됨) */
+        }
+
+        .list-title {
+            font-family: 'Albert Sans', sans-serif;
+            font-size: 22px;
+            font-weight: 500;
+            color: #ff3b00;
+            margin-bottom: 20px;
+            margin-top: 0;
+        }
+
+        .career-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .career-list li {
+            font-family: 'Albert Sans', sans-serif;
+            font-size: 14px;
+            color: #888888; /* 시안의 회색 텍스트 */
+            line-height: 1.9;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        /* 해상도에 따른 타이포그래피 스케일링 (태블릿/모바일) */
+        @media (max-width: 1024px) {
+            .career-middle-wrapper {
+                flex-direction: column;
+                align-items: flex-start; /* 모바일에서도 왼쪽 정렬로 통일 */
+                gap: 60px;
+            }
+            .slash {
+                display: none; /* 모바일 세로 배치 시 슬래시 숨김 */
+            }
+            .career-block {
+                align-items: flex-start;
+            }
+            .career-list {
+                padding-left: 0;
+                text-align: left; /* 모바일에서도 좌측 정렬 유지 */
+            }
+        }
+
+        /* ASCII 관련 CSS 완전 제거 및 대체 스타일 위에서 정의함 */
+
+        .grid-3-col {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            margin-top: 50px;
+        }
+
+        .grid-item h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .grid-item p {
+            font-size: 15px;
+            color: #888;
+            line-height: 1.6;
+        }
+
+        .link-text {
+            display: inline-block;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #fff;
+            text-decoration: none;
+            border-bottom: 1px solid #fff;
+            padding-bottom: 5px;
+            transition: color 0.3s, border-color 0.3s;
+        }
+
+        .link-text:hover {
+            color: var(--cursor-color);
+            border-color: var(--cursor-color);
+        }
+
+        /* ----------------------------------
+           PORTFOLIO (메이슨리 갤러리 썸네일) 
+           ---------------------------------- */
+        .gallery-wrapper {
+            padding: 75px 40px 40px; 
+            min-height: 100vh;
+        }
+
+        .masonry-grid {
+            column-count: 4;
+            column-gap: 20px;
+        }
+
+        @media (max-width: 1200px) { .masonry-grid { column-count: 3; } }
+        @media (max-width: 900px) { .masonry-grid { column-count: 2; } }
+        @media (max-width: 600px) { .masonry-grid { column-count: 1; } }
+
+        .gallery-item {
+            break-inside: avoid;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            background-color: #222222;
+            opacity: 0; /* 애니메이션 시작 전 숨김 처리 */
+        }
+
+        /* PORTFOLIO 진입 시 상하 어긋남(Stagger) 정렬 애니메이션 */
+        #portfolio-view.active-page .gallery-item {
+            animation-duration: 2s;
+            animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+            animation-fill-mode: forwards;
+        }
+
+        #portfolio-view.active-page .gallery-item.slide-up {
+            animation-name: slideFromBottom;
+        }
+        
+        #portfolio-view.active-page .gallery-item.slide-down {
+            animation-name: slideFromTop;
+        }
+
+        @keyframes slideFromBottom {
+            0% { transform: translateY(250px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes slideFromTop {
+            0% { transform: translateY(-250px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .gallery-item img {
+            width: 100%;
+            display: block;
+            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            object-fit: cover;
+            will-change: transform;
+        }
+
+        .gallery-item:hover img { transform: scale(1.08); }
+
+        .gallery-item::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            border: 15px solid transparent;
+            box-sizing: border-box;
+            transition: border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .gallery-item:hover::after { border-color: #000000; }
+
+        .item-overlay {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%;
+            padding: 40px 20px 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+            color: #ffffff; display: flex; align-items: flex-end; pointer-events: none;
+        }
+        .item-text { font-size: 13px; line-height: 1.4; letter-spacing: -0.2px; }
+        .item-title { font-weight: 700; }
+        .item-desc { font-weight: 400; opacity: 0.85; }
+
+        /* 상세 페이지 */
+        #detail-view {
+            position: fixed;
+            top: 100vh; left: 0; width: 100vw; height: 100vh;
+            background-color: var(--bg-color); z-index: 1000;
+            overflow-y: auto; overflow-x: hidden;
+            transition: transform 0.8s var(--transition-ease);
+            will-change: transform;
+        }
+        #detail-view.active { transform: translateY(-100vh); }
+
+        .close-btn {
+            position: fixed; top: 30px; right: 30px; width: 50px; height: 50px;
+            background-color: #000; z-index: 1010; display: flex; justify-content: center; align-items: center;
+            border: 1px solid rgba(255,255,255,0.1); opacity: 0; pointer-events: none;
+            transition: background-color 0.3s ease, transform 0.3s ease, opacity 0.4s ease;
+        }
+        .close-btn.active { opacity: 1; pointer-events: auto; }
+        .close-btn.active:hover { background-color: #222; transform: scale(0.95); }
+        .chevron-down {
+            width: 16px; height: 16px; border-bottom: 2px solid #fff; border-right: 2px solid #fff;
+            transform: rotate(45deg); margin-bottom: 6px; pointer-events: none;
+        }
+
+        .detail-hero { width: 100%; height: 100vh; position: relative; }
+        .detail-hero img { width: 100%; height: 100%; object-fit: cover; }
+        .detail-content { padding: 150px 0; position: relative; background-color: var(--bg-color); }
+        .content-inner { max-width: 900px; margin: 0 auto; padding: 50px 40px; font-size: 20px; line-height: 1.8; text-align: center; color: rgba(255,255,255,0.8); font-weight: 300; }
+        .content-inner h2 { font-size: 48px; font-weight: 800; color: #fff; margin-bottom: 40px; letter-spacing: -1px; }
+
+        .detail-image-container { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 40px; padding: 0 40px 100px; }
+        .detail-image-container img { width: 100%; max-width: 1200px; height: auto; border-radius: 8px; object-fit: cover; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); }
+        .full-width-img { width: 100vw !important; max-width: 100vw !important; border-radius: 0 !important; }
+
+        .fade-up-item { opacity: 0; transform: translateY(60px); transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1); will-change: opacity, transform; }
+        .fade-up-item.visible { opacity: 1; transform: translateY(0); }
+
+    </style>
+</head>
+<body>
+
+    <!-- 커스텀 커서 -->
+    <div id="custom-cursor"></div>
+
+    <!-- 헤더 메뉴 (네비게이션) -->
+    <header>
+        <div class="nav-item active" id="nav-home">ABOUT</div>
+        <div class="nav-item" id="nav-portfolio">PORTFOLIO</div>
+    </header>
+
+    <!-- 항상 고정되는 카피라이트 텍스트 -->
+    <div class="copyright">©2026</div>
+
+    <!-- 1. HOME (메인 페이지) -->
+    <div id="home-view" class="page-view active-page">
+        
+        <!-- 좌측 스크롤 세로 네비게이션 -->
+        <div class="vertical-nav" id="home-scrollspy">
+            <div class="nav-dot active" data-target="section-01">
+                <span class="num">01</span><span class="label">Hello</span>
+            </div>
+            <div class="nav-dot" data-target="section-02">
+                <span class="num">02</span><span class="label">Career</span>
+            </div>
+            <div class="nav-dot" data-target="section-03">
+                <span class="num">03</span><span class="label">Portfolio</span>
+            </div>
+            <div class="nav-dot" data-target="section-04">
+                <span class="num">04</span><span class="label">Contact</span>
+            </div>
+        </div>
+
+        <!-- 디자인 시안 적용된 메인 섹션 -->
+        <section id="section-01" class="home-section hero-section">
+            <div class="hero-content">
+                <div class="hero-top-text">
+                    <h2>HELLO<br>I AM</h2>
+                    <div class="line"></div>
+                </div>
+        
+                <div class="hero-center-wrapper">
+                    <h1 class="bg-text">KANG<br>HYUN<br>JUNG</h1>
+                    <p class="fg-text">Designer</p>
+                </div>
+        
+                <div class="hero-bottom-text">
+                    안녕하세요<br>UI/UX/BX 디자이너 강현정입니다.
+                </div>
+            </div>
+        </section>
+
+        <!-- 두 번째 섹션 (Career Experience) 디자인 적용 -->
+        <section id="section-02" class="home-section career-section">
+            <div class="career-content">
+                <div class="career-top-text">
+                    <h2>CAREER<br>EXPERIENCE</h2>
+                    <div class="line"></div>
+                </div>
+
+                <div class="career-middle-wrapper">
+                    <!-- 첫 번째 경력 블록 (16년) -->
+                    <div class="career-block">
+                        <div class="number-bg">16</div>
+                        <div class="text-group group-16">
+                            <span class="year-text">2000-2016</span>
+                            <div class="career-list">
+                                <h3 class="list-title">Officeworker</h3>
+                                <ul>
+                                    <li>E-Point</li>
+                                    <li>Iluxury</li>
+                                    <li>Prestigecom</li>
+                                    <li>Seedpost</li>
+                                    <li>Toppings</li>
+                                    <li>Leelkang P&C</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 슬래시 (/) 기호 -->
+                    <div class="slash">/</div>
+
+                    <!-- 두 번째 경력 블록 (08년) -->
+                    <div class="career-block">
+                        <div class="number-bg">08</div>
+                        <div class="text-group group-08">
+                            <span class="year-text">2017- NOW</span>
+                            <div class="career-list">
+                                <h3 class="list-title">Freelancer</h3>
+                                <ul>
+                                    <li>Graphic Designer</li>
+                                    <li>Logo/Branding Designer</li>
+                                    <li>Package Designer</li>
+                                    <li>SNS Content Designer</li>
+                                    <li>UI/UX Designer</li>
+                                    <li>Detail Page Designer</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 세 번째 섹션 (Selected Work / Portfolio) 적용 -->
+        <section id="section-03" class="home-section sw-section">
+            <div class="sw-wrapper">
+                <div class="sw-header">
+                    <h2>SELECTED<br>WORK</h2>
+                    <div class="line"></div>
+                </div>
+
+                <div class="sw-container">
+                    <span class="sw-year">2000-2026</span>
+                    <h2 class="sw-title-script">P<span class="ortfolio">ortfolio</span></h2>
+
+                    <!-- 시안의 색감과 형태에 맞춘 이미지 5장 -->
+                    <img src="https://images.unsplash.com/photo-1520639888713-7851133b1ed0?q=80&w=600&auto=format&fit=crop" class="sw-img img-1" alt="Work 1">
+                    <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=600&auto=format&fit=crop" class="sw-img img-2" alt="Work 2">
+                    <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=600&auto=format&fit=crop&grayscale" class="sw-img img-3" alt="Work 3">
+                    <img src="https://images.unsplash.com/photo-1618085222100-89cfdd8b23ad?q=80&w=600&auto=format&fit=crop" class="sw-img img-4" alt="Work 4">
+                    <img src="https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=600&auto=format&fit=crop" class="sw-img img-5" alt="Work 5">
+
+                    <a href="#" class="sw-link" id="link-to-portfolio">View portfolio</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 네 번째 섹션 (Contact) 적용 -->
+        <section id="section-04" class="home-section contact-section">
+            <div class="contact-container">
+                <div class="contact-header">
+                    <h2>CONTACT</h2>
+                    <div class="line"></div>
+                </div>
+                
+                <div class="contact-hero">
+                    <h2 class="bg-text-contact">WHAT<br>DO YOU<br>ACTUALLY<br>WANT?</h2>
+                    <h2 class="fg-text-contact">Honestly</h2>
+                </div>
+                
+                <div class="contact-body">
+                    <p class="highlight">당신은 어떤 디자이너를 원하나요?</p>
+                    
+                    <p>문제 해결보다 속도를 택하는 디자이너?<br>
+                    수정 요청에 무조건 따르거나, 무조건 거부하는 디자이너?<br>
+                    과거 방식만 고수하고, 자기 스타일만 고집하는 디자이너?</p>
+                    
+                    <p>지금까지 언급한 디자이너는 업계에서 가장 먼저 퇴출당하는 1순위입니다.<br>
+                    그리고 지금, 한 명이 더 추가됐습니다.</p>
+                    
+                    <p>AI를 모른 척하며 10년 전 방식으로만 일하는 디자이너.<br>
+                    AI는 도구입니다. 방향을 잡는 건 여전히 사람입니다.</p>
+                    
+                    <p class="highlight mt-x">솔직히 말씀드리겠습니다.</p>
+                    
+                    <p>클라이언트의 요청이 항상 옳지는 않습니다.</p>
+                    
+                    <p>"이렇게 해주세요"가 브랜드를 망치는 방향일 때,<br>
+                    저는 그냥 만들지 않습니다.</p>
+                    
+                    <p>왜 안 되는지, 뭐가 더 나은지 ─ 데이터와 논리로 설득합니다.</p>
+                    
+                    <p>불편한 말을 꺼낼 수 있는 디자이너.<br>
+                    그게 결국 클라이언트의 브랜드를 지키는 디자이너입니다.</p>
+                    
+                    <p>클라이언트가 진짜 원하는 건 따로 있습니다.</p>
+                    
+                    <p>빠른 납품이 아닌, 믿고 맡길 수 있는 사람.<br>
+                    예쁜 디자인이 아닌, 문제를 해결하는 디자인.<br>
+                    AI 활용이 아닌, AI로 더 나은 결과를 내는 판단력.</p>
+                    
+                    <p>아이디어가 반쪽이어도 괜찮습니다.</p>
+                    
+                    <p>모호한 생각을 구체적인 방향으로 만드는 것.<br>
+                    그게 제 역할입니다.</p>
+                    
+                    <p>지금 첫 문장을 보내주세요.<br>
+                    "이런 프로젝트인데요─" 한 줄이면 충분합니다.</p>
+                    
+                    <a href="mailto:genie0875@gmail.com" class="email-link">genie0875@gmail.com</a>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- 2. PORTFOLIO (갤러리 페이지) -->
+    <div id="portfolio-view" class="page-view gallery-wrapper">
+        <div class="masonry-grid" id="gallery">
+            <!-- 자바스크립트로 동적 생성됨 -->
+        </div>
+    </div>
+
+    <!-- 닫기 버튼 (상세 페이지용) -->
+    <div class="close-btn" id="close-detail">
+        <div class="chevron-down"></div>
+    </div>
+
+    <!-- 상세 페이지 (Plus X 슬라이드 트랜지션) -->
+    <div id="detail-view">
+        <div class="detail-hero">
+            <img id="detail-hero-img" src="" alt="Hero">
+        </div>
+
+        <div class="detail-content">
+            <div class="content-inner">
+                <h2 class="fade-up-item">EXPERIENCE THE NEW EQL</h2>
+                <p class="fade-up-item">브랜드의 아이덴티티를 디지털 프로덕트와 융합하여 고객에게 전달합니다. EQL이 할 수 있는 콘텐츠와 상품의 끊임없는 소비 경험으로 고객이 원하는 트렌드를 이끌어갑니다.</p>
+            </div>
+            
+            <div class="detail-image-container">
+                <img class="fade-up-item" src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1600&auto=format&fit=crop" alt="Detail Content 1">
+                <img class="fade-up-item" src="https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=1600&auto=format&fit=crop" alt="Detail Content 2">
+                <img class="fade-up-item full-width-img" src="video2.jpg" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=1600&auto=format&fit=crop';" alt="Detail Content 3">
+                <img class="fade-up-item" src="https://images.unsplash.com/photo-1618761714954-0b8cd0026356?q=80&w=1600&auto=format&fit=crop" alt="Detail Content 4">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 더미 데이터 설정 ---
+        const projects = [
+            { id: 1, title: "ROGER VIVIER", desc: "Parisian Luxury meets digital elegance", tag: "", img: "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?q=80&w=800&h=1200&auto=format&fit=crop" },
+            { id: 2, title: "BLOOM & WOLF", desc: "Rebranding, content creation and a scalable e-commerce solution", tag: "Newly Added", img: "https://images.unsplash.com/photo-1563241527-20042cb36a33?q=80&w=800&h=1100&auto=format&fit=crop" },
+            { id: 3, title: "XBIONIC TERRASKIN", desc: "Launching the first trail running footwear system", tag: "Headless Shopify", img: "https://images.unsplash.com/photo-1556817411-31ae72fa3ea8?q=80&w=800&h=1300&auto=format&fit=crop" },
+            { id: 4, title: "AKRIS", desc: "Meticulous redesign & development of a sensual minimalist fashion house", tag: "Shopify", img: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800&h=1050&auto=format&fit=crop" },
+            { id: 5, title: "ARK8", desc: "Digital flagship store for a luxury streetwear brand", tag: "Shopify", img: "https://images.unsplash.com/photo-1523398002811-999aa8ec58d1?q=80&w=800&h=1250&auto=format&fit=crop" },
+            { id: 6, title: "BEYONCÉ", desc: "Digital experience", tag: "", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&h=1150&auto=format&fit=crop" },
+            { id: 7, title: "POLAROID I-2", desc: "Shoppable campaign site to launch the premium I-2 camera", tag: "Shopify", img: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?q=80&w=800&h=1350&auto=format&fit=crop" },
+            { id: 8, title: "BEACHWEAR", desc: "Summer collection", tag: "", img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800&h=1000&auto=format&fit=crop" },
+            { id: 9, title: "VITRA", desc: "Designing an engineering architecture", tag: "Most Awarded", img: "https://images.unsplash.com/photo-1505843490538-5133c6c7d0e1?q=80&w=800&h=1200&auto=format&fit=crop" },
+            { id: 10, title: "MAMMUT", desc: "Moved by mountains", tag: "", img: "https://images.unsplash.com/photo-1522163182402-834f871fd851?q=80&w=800&h=1100&auto=format&fit=crop" },
+            { id: 11, title: "ACE & TATE", desc: "Envisioning an omnichannel future", tag: "", img: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=800&h=1300&auto=format&fit=crop" },
+            { id: 12, title: "FOAM MUSEUM", desc: "Cultural platform all about photography", tag: "", img: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?q=80&w=800&h=1050&auto=format&fit=crop" },
+            { id: 13, title: "STUDIO JOB", desc: "Digital art piece for an artist", tag: "", img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&h=1250&auto=format&fit=crop" },
+            { id: 14, title: "KLARNA", desc: "Building an immersive platform", tag: "Fintech", img: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=800&h=1150&auto=format&fit=crop" },
+            { id: 15, title: "SECRID", desc: "A better world starts in your pocket", tag: "Shopify", img: "https://images.unsplash.com/photo-1627123424574-724758594e93?q=80&w=800&h=1350&auto=format&fit=crop" },
+            { id: 16, title: "LAND OF RIDE", desc: "Unfold the world of adventures", tag: "Shopify", img: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=800&h=1000&auto=format&fit=crop" }
+        ];
+
+        const gallery = document.getElementById('gallery');
+        
+        // 갤러리 렌더링
+        projects.forEach((proj, index) => {
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            
+            // 4개 단위로 컬럼을 계산하여 상하 교차 애니메이션 클래스 부여 (4단 기준)
+            if ((index % 8) < 4) {
+                item.classList.add('slide-up');
+            } else {
+                item.classList.add('slide-down');
+            }
+
+            const badgeHtml = proj.tag ? `<div class="item-badge">${proj.tag}</div>` : '';
+            item.innerHTML = `
+                <img src="${proj.img}" alt="${proj.title}" onerror="this.closest('.gallery-item').remove()">
+                ${badgeHtml}
+                <div class="item-overlay">
+                    <div class="item-text">
+                        <span class="item-title">${proj.title}</span> &middot; <span class="item-desc">${proj.desc}</span>
+                    </div>
+                </div>
+            `;
+            gallery.appendChild(item);
+        });
+
+        // --- 커스텀 커서 애니메이션 ---
+        const cursor = document.getElementById('custom-cursor');
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let cursorX = mouseX;
+        let cursorY = mouseY;
+        
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            if(!cursor.classList.contains('active')) cursor.classList.add('active');
+        });
+
+        function animateCursor() {
+            let dx = mouseX - cursorX;
+            let dy = mouseY - cursorY;
+            cursorX += dx * 0.15;
+            cursorY += dy * 0.15;
+            cursor.style.transform = `translate3d(${cursorX}px, ${cursorY}px, 0) translate(-50%, -50%)`;
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            item.addEventListener('mouseenter', () => cursor.classList.add('hover-img'));
+            item.addEventListener('mouseleave', () => cursor.classList.remove('hover-img'));
+        });
+
+        document.querySelectorAll('.nav-item, .close-btn, .nav-dot, .link-text').forEach(btn => {
+            btn.addEventListener('mouseenter', () => cursor.style.transform += ' scale(0.5)');
+            btn.addEventListener('mouseleave', () => cursor.style.transform = cursor.style.transform.replace(' scale(0.5)', ''));
+        });
+
+        // --- 네비게이션 탭 전환 로직 (ABOUT / PORTFOLIO) ---
+        const navHome = document.getElementById('nav-home');
+        const navPortfolio = document.getElementById('nav-portfolio');
+        const homeView = document.getElementById('home-view');
+        const portfolioView = document.getElementById('portfolio-view');
+        const linkToPortfolio = document.getElementById('link-to-portfolio-2');
+        
+        // 페이지 초기 진입 시 ABOUT 페이지용 스크롤 스냅 활성화
+        document.documentElement.classList.add('snap-scroll');
+
+        let isAutoScrolling = false; // ABOUT에서는 자동스크롤 꺼둠
+        let autoScrollStartTimeout; // 스크롤 딜레이 제어용 변수
+
+        function switchToPortfolio() {
+            navPortfolio.classList.add('active');
+            navHome.classList.remove('active');
+            
+            portfolioView.classList.add('active-page');
+            homeView.classList.remove('active-page');
+            
+            // PORTFOLIO 화면에서는 부드러운 스냅 스크롤 기능을 끕니다.
+            document.documentElement.classList.remove('snap-scroll');
+            
+            isAutoScrolling = false; // 정렬되는 동안 스크롤 정지
+            window.scrollTo(0, 0); 
+            
+            // 탭 재진입 시 애니메이션이 다시 재생되도록 브라우저 리플로우(Reflow) 강제 트리거
+            const items = document.querySelectorAll('.gallery-item');
+            items.forEach(item => {
+                item.style.animation = 'none';
+                void item.offsetWidth; 
+                item.style.animation = '';
+            });
+
+            // 정렬 애니메이션 시간(2초) + 추가 텀(1초) = 총 3초 뒤에 자동 스크롤 시작
+            clearTimeout(autoScrollStartTimeout);
+            autoScrollStartTimeout = setTimeout(() => {
+                if (portfolioView.classList.contains('active-page')) {
+                    isAutoScrolling = true;
+                }
+            }, 3000);
+        }
+
+        navHome.addEventListener('click', () => {
+            navHome.classList.add('active');
+            navPortfolio.classList.remove('active');
+            
+            homeView.classList.add('active-page');
+            portfolioView.classList.remove('active-page');
+            
+            // ABOUT 화면 복귀 시 다시 스크롤 스냅 기능 켜기
+            document.documentElement.classList.add('snap-scroll');
+            
+            isAutoScrolling = false;
+            window.scrollTo(0, 0); 
+        });
+
+        navPortfolio.addEventListener('click', switchToPortfolio);
+        linkToPortfolio?.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchToPortfolio();
+        });
+
+
+        // --- 자동 스크롤 제어 (PORTFOLIO 전용) ---
+        let autoScrollSpeed = 0.35; // 영상처럼 더 천천히 스크롤되도록 속도 감소 (기존 0.6)
+        let userScrollTimeout;
+        const detailView = document.getElementById('detail-view');
+
+        function autoScroll() {
+            if (isAutoScrolling && !detailView.classList.contains('active')) {
+                window.scrollBy(0, autoScrollSpeed);
+                if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 5) {
+                    window.scrollTo(0, 0);
+                }
+            }
+            requestAnimationFrame(autoScroll);
+        }
+        setTimeout(() => autoScroll(), 1000);
+
+        const pauseAutoScroll = () => {
+            if (portfolioView.classList.contains('active-page')) {
+                isAutoScrolling = false;
+                clearTimeout(userScrollTimeout);
+                userScrollTimeout = setTimeout(() => {
+                    isAutoScrolling = true;
+                }, 2500);
+            }
+        };
+
+        window.addEventListener('wheel', pauseAutoScroll, {passive: true});
+        window.addEventListener('touchmove', pauseAutoScroll, {passive: true});
+
+
+        // --- ABOUT 화면 스크롤 스파이 (Scrollspy) 구현 ---
+        const homeSections = document.querySelectorAll('.home-section');
+        const navDots = document.querySelectorAll('.nav-dot');
+        const scrollspyObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const currentId = entry.target.getAttribute('id');
+                    
+                    // 화면에 진입하면 클래스를 추가하여 애니메이션 트리거
+                    entry.target.classList.add('is-visible');
+                    
+                    navDots.forEach(dot => {
+                        dot.classList.remove('active');
+                        if (dot.getAttribute('data-target') === currentId) {
+                            dot.classList.add('active');
+                        }
+                    });
+                } else {
+                    // 화면에서 벗어나면 클래스를 제거하여 다음에 재진입 시 애니메이션이 반복되도록 설정
+                    entry.target.classList.remove('is-visible');
+                }
+            });
+        }, { threshold: 0.5 }); 
+
+        homeSections.forEach(section => {
+            scrollspyObserver.observe(section);
+        });
+
+        navDots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                const targetId = dot.getAttribute('data-target');
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+
+        // --- 상세 페이지 트랜지션 및 페이드 업 ---
+        const detailHeroImg = document.getElementById('detail-hero-img');
+        const closeBtn = document.getElementById('close-detail');
+
+        const fadeUpItems = document.querySelectorAll('.fade-up-item');
+        const observerOptions = { root: detailView, threshold: 0.15 };
+        
+        const detailObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, observerOptions);
+
+        fadeUpItems.forEach(item => detailObserver.observe(item));
+
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                detailHeroImg.src = item.querySelector('img').src;
+                detailView.scrollTop = 0;
+                detailView.classList.add('active');
+                closeBtn.classList.add('active');
+            });
+        });
+
+        closeBtn.addEventListener('click', () => {
+            detailView.classList.remove('active');
+            closeBtn.classList.remove('active');
+            setTimeout(() => { fadeUpItems.forEach(item => item.classList.remove('visible')); }, 800);
+        });
+
+    </script>
+</body>
+</html>
