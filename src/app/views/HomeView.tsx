@@ -32,23 +32,23 @@ export function HomeView() {
   return (
     <div
       ref={containerRef}
-      className="w-full h-screen overflow-y-auto overflow-x-hidden md:snap-y md:snap-mandatory bg-[#131313] scroll-smooth relative"
+      className="w-full h-[100dvh] overflow-y-auto overflow-x-hidden md:snap-y md:snap-mandatory bg-[#131313] scroll-smooth relative"
     >
       <VerticalNav activeSection={activeSection} />
       
-      <section id="section-01" className="home-section md:snap-start w-full h-screen relative flex flex-col justify-center px-0 md:px-[150px]">
+      <section id="section-01" className="home-section md:snap-start w-full h-[100dvh] relative flex flex-col justify-center px-0 md:px-[150px]">
         <HeroSection isActive={activeSection === "section-01"} />
       </section>
 
-      <section id="section-02" className="home-section md:snap-start w-full h-screen relative flex flex-col justify-center px-0 md:px-[150px]">
+      <section id="section-02" className="home-section md:snap-start w-full h-[100dvh] relative flex flex-col justify-center px-0 md:px-[150px]">
         <CareerSection isActive={activeSection === "section-02"} />
       </section>
 
-      <section id="section-03" className="home-section md:snap-start w-full h-screen relative flex flex-col justify-center px-0 md:px-[150px]">
+      <section id="section-03" className="home-section md:snap-start w-full h-[100dvh] relative flex flex-col justify-center px-0 md:px-[150px]">
         <SelectedWorkSection isActive={activeSection === "section-03"} />
       </section>
 
-      <section id="section-04" className="home-section md:snap-start w-full min-h-screen relative flex flex-col justify-center px-0 md:px-[150px]">
+      <section id="section-04" className="home-section md:snap-start w-full min-h-[100dvh] relative flex flex-col justify-center px-0 md:px-[150px]">
         <ContactSection isActive={activeSection === "section-04"} />
       </section>
     </div>
