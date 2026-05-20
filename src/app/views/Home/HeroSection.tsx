@@ -9,7 +9,7 @@ export function HeroSection({ isActive }: { isActive: boolean }) {
   return (
     <>
       {/* --- DESKTOP HERO --- */}
-      <div className="hidden md:flex absolute inset-0 justify-center items-center overflow-hidden">
+      <div className="hidden md:flex absolute inset-0 justify-center items-center overflow-hidden mb-[100px]">
         <div className="relative flex flex-col items-start justify-center z-20 pointer-events-none">
           <motion.div
             className="pointer-events-auto text-left mb-[70px]"

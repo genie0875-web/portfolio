@@ -9,7 +9,7 @@ export function CareerSection({ isActive }: { isActive: boolean }) {
   return (
     <>
       {/* --- DESKTOP CAREER --- */}
-      <div className="hidden md:flex relative w-full h-full justify-center items-center overflow-hidden">
+      <div className="hidden md:flex relative w-full h-full justify-center items-center overflow-hidden mb-[100px]">
         <div className="relative flex flex-col items-start z-10 w-max max-w-[100vw] px-[40px]">
           <motion.div
             className="mt-[-50px] mb-[100px] ml-[65px]"

@@ -36,15 +36,15 @@ export function HomeView() {
     >
       <VerticalNav activeSection={activeSection} />
       
-      <section id="section-01" className="home-section snap-start w-full h-[100dvh] relative flex flex-col justify-center px-0 md:px-[150px]">
+      <section id="section-01" className="home-section snap-start w-full h-[100dvh] relative flex flex-col justify-center px-0 md:px-[150px] md:-mt-[100px]">
         <HeroSection isActive={activeSection === "section-01"} />
       </section>
 
-      <section id="section-02" className="home-section snap-start w-full h-[100dvh] relative flex flex-col justify-center px-0 md:px-[150px]">
+      <section id="section-02" className="home-section snap-start w-full h-[100dvh] relative flex flex-col justify-center px-0 md:px-[150px] md:-mt-[100px]">
         <CareerSection isActive={activeSection === "section-02"} />
       </section>
 
-      <section id="section-03" className="home-section snap-start w-full h-[100dvh] relative flex flex-col justify-center px-0 md:px-[150px]">
+      <section id="section-03" className="home-section snap-start w-full h-[100dvh] relative flex flex-col justify-center px-0 md:px-[150px] md:-mt-[100px]">
         <SelectedWorkSection isActive={activeSection === "section-03"} />
       </section>
 
