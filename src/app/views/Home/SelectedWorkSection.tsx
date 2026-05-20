@@ -27,7 +27,7 @@ export function SelectedWorkSection({ isActive }: { isActive: boolean }) {
   return (
     <>
       {/* --- DESKTOP SELECTED WORK --- */}
-      <div className="hidden md:flex relative w-full h-full justify-center items-center overflow-hidden mb-[100px]">
+      <div className="hidden md:flex relative w-full h-full justify-center items-center overflow-hidden mb-[200px]">
         <div className="relative w-[1016px] h-[750px] origin-center scale-[0.3] sm:scale-[0.45] md:scale-[0.65] lg:scale-[0.85] xl:scale-100">
           <motion.div
             className="absolute top-[0px] left-[142px] z-[20]"
