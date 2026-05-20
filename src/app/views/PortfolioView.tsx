@@ -205,14 +205,6 @@ export function PortfolioView() {
               {selectedProject.detail_images && selectedProject.detail_images.length > 0 ? (
                  <div className="w-full flex justify-center">
                  <div className="flex flex-col items-center w-full gap-[0px] pt-[150px] pb-[100px]">
-                 <div className="flex flex-col items-center max-w-[900px] w-full px-[40px] text-center gap-[16px]">
-                      <h2 className="text-[32px] md:text-[48px] font-[600] text-white tracking-[-1px]">
-                        {selectedProject.title}
-                      </h2>
-                      <p className="text-[16px] md:text-[20px] leading-[1.8] text-[rgba(255,255,255,0.6)]">
-                        {selectedProject.description}
-                      </p>
-                    </div>
                     {selectedProject.detail_images.map((imgUrl, idx) => (
                       <div key={idx} className="w-full">
                         <img
