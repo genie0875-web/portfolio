@@ -18,7 +18,7 @@ export function HomeView() {
           }
         });
       },
-      { threshold: 0.5 }
+      { threshold: 0.3 }  // 0.5 → 0.3으로 낮춰서 더 잘 감지
     );
 
     const sections = document.querySelectorAll(".home-section");
@@ -48,7 +48,8 @@ export function HomeView() {
         <SelectedWorkSection isActive={activeSection === "section-03"} />
       </section>
 
-      <section id="section-04" className="home-section snap-start w-full h-auto md:h-[100dvh] relative flex flex-col justify-center px-0 md:px-[150px]">
+      {/* ✅ Contact: snap-start + min-h-[100dvh] */}
+      <section id="section-04" className="home-section snap-start w-full min-h-[100dvh] relative flex flex-col justify-center px-0 md:px-[150px]">
         <ContactSection isActive={activeSection === "section-04"} />
       </section>
     </div>
