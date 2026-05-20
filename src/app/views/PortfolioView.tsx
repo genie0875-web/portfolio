@@ -9,17 +9,17 @@ export function PortfolioView() {
   const [isAutoScrolling, setIsAutoScrolling] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const detailRef = useRef<HTMLDivElement>(null);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null); // ✅ 추가
   const [isReady, setIsReady] = useState(false);
   const [cols, setCols] = useState(5);
   const [selectedProject, setSelectedProject] = useState<Portfolio | null>(null);
   const [isDetailActive, setIsDetailActive] = useState(false);
-  const [animationKey, setAnimationKey] = useState(0); // ✅ 애니메이션 강제 리셋용
 
   const projects = portfolios;
 
   const handleItemClick = (proj: Portfolio) => {
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current); // ✅ 진행중 타임아웃 취소
     setSelectedProject(proj);
-    setAnimationKey((prev) => prev + 1); // ✅ 클릭마다 key 변경 → 애니메이션 재실행
     setIsDetailActive(true);
     setIsAutoScrolling(false);
     if (detailRef.current) detailRef.current.scrollTop = 0;
@@ -27,7 +27,7 @@ export function PortfolioView() {
 
   const handleCloseDetail = () => {
     setIsDetailActive(false);
-    setTimeout(() => {
+    closeTimeoutRef.current = setTimeout(() => { // ✅ ref로 추적
       setSelectedProject(null);
       setIsAutoScrolling(true);
     }, 800);
@@ -38,8 +38,8 @@ export function PortfolioView() {
     if (selectedId && portfolios.length > 0) {
       const found = portfolios.find((p) => p.id === selectedId);
       if (found) {
+        if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
         setSelectedProject(found);
-        setAnimationKey((prev) => prev + 1);
         setIsDetailActive(true);
         setIsAutoScrolling(false);
       }
@@ -126,11 +126,11 @@ export function PortfolioView() {
   }
 
   const aspectPatterns = [
-    ["aspect-[3/4]", "aspect-[2/3]", "aspect-[4/5]", "aspect-[1/1]",  "aspect-[3/5]"],
-    ["aspect-[1/1]",  "aspect-[4/5]", "aspect-[3/5]", "aspect-[3/4]", "aspect-[2/3]"],
-    ["aspect-[4/5]", "aspect-[3/5]", "aspect-[1/1]",  "aspect-[2/3]", "aspect-[3/4]"],
-    ["aspect-[2/3]", "aspect-[1/1]",  "aspect-[3/4]", "aspect-[3/5]", "aspect-[4/5]"],
-    ["aspect-[3/5]", "aspect-[3/4]", "aspect-[2/3]", "aspect-[4/5]", "aspect-[1/1]" ],
+    ["aspect-[3/4]", "aspect-[2/3]", "aspect-[4/5]", "aspect-[1/1]", "aspect-[3/5]"],
+    ["aspect-[1/1]", "aspect-[4/5]", "aspect-[3/5]", "aspect-[3/4]", "aspect-[2/3]"],
+    ["aspect-[4/5]", "aspect-[3/5]", "aspect-[1/1]", "aspect-[2/3]", "aspect-[3/4]"],
+    ["aspect-[2/3]", "aspect-[1/1]", "aspect-[3/4]", "aspect-[3/5]", "aspect-[4/5]"],
+    ["aspect-[3/5]", "aspect-[3/4]", "aspect-[2/3]", "aspect-[4/5]", "aspect-[1/1]"],
   ];
 
   return (
@@ -203,33 +203,19 @@ export function PortfolioView() {
           {selectedProject && (
             <div className="flex flex-col w-full bg-[#111111] min-h-screen">
               {selectedProject.detail_images && selectedProject.detail_images.length > 0 ? (
-                <div className="w-full flex justify-center overflow-hidden">
-                  {/* ✅ animationKey 변경 시 컨텐츠 전체 리마운트 → 애니메이션 재실행 */}
-                  <div key={animationKey} className="flex flex-col items-center w-full gap-[40px] pt-[150px] pb-[100px]">
+                <div className="w-full flex justify-center">
+                  <div className="flex flex-col items-center w-full gap-[40px] pt-[150px] pb-[100px]">
                     <div className="flex flex-col items-center max-w-[900px] w-full px-[40px] text-center gap-[16px]">
-                      <motion.h2
-                        initial={{ opacity: 0, y: 60 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.8 }}
-                        className="text-[32px] md:text-[48px] font-[800] text-white tracking-[-1px]"
-                      >
+                      <h2 className="text-[32px] md:text-[48px] font-[600] text-white tracking-[-1px]">
                         {selectedProject.title}
-                      </motion.h2>
-                      <motion.p
-                        initial={{ opacity: 0, y: 60 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.9 }}
-                        className="text-[16px] md:text-[20px] leading-[1.8] text-[rgba(255,255,255,0.6)]"
-                      >
+                      </h2>
+                      <p className="text-[16px] md:text-[20px] leading-[1.8] text-[rgba(255,255,255,0.6)]">
                         {selectedProject.description}
-                      </motion.p>
+                      </p>
                     </div>
                     {selectedProject.detail_images.map((imgUrl, idx) => (
                       <div key={idx} className="w-full max-w-[1200px] px-[40px]">
-                        <motion.img
-                          initial={{ opacity: 0, y: 60 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.8 + idx * 0.1 }}
+                        <img
                           className="w-full h-auto rounded-[8px] object-cover shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
                           src={imgUrl}
                           alt={`${selectedProject.title} ${idx + 1}`}
