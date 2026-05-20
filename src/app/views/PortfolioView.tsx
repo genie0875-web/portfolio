@@ -204,7 +204,7 @@ export function PortfolioView() {
             <div className="flex flex-col w-full bg-[#111111] min-h-screen">
               {selectedProject.detail_images && selectedProject.detail_images.length > 0 ? (
                  <div className="w-full flex justify-center">
-                 <div className="flex flex-col items-center w-full gap-[0px] pt-[150px] pb-[100px]">
+                 <div className="flex flex-col items-center w-full gap-[0px] pt-[0px] pb-[100px]">
                     {selectedProject.detail_images.map((imgUrl, idx) => (
                       <div key={idx} className="w-full">
                         <img
