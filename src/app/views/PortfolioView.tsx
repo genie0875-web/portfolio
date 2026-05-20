@@ -143,9 +143,9 @@ export function PortfolioView() {
           const columnsData = Array.from({ length: cols }, () => [] as (Portfolio & { originalIndex: number })[]);
           projects.forEach((proj, idx) => columnsData[idx % cols].push({ ...proj, originalIndex: idx }));
           return (
-            <div className="flex w-full gap-[10px] md:gap-[40px] items-start mx-auto max-w-[1600px] px-[10px] md:px-[40px]">
+            <div className="flex w-full gap-[10px] md:gap-[20px] items-start mx-auto max-w-[1600px] px-[10px] md:px-[40px]">
               {columnsData.map((colItems, colIndex) => (
-                <div key={`col-${colIndex}`} className="flex flex-col flex-1 gap-[10px] md:gap-[40px]">
+                <div key={`col-${colIndex}`} className="flex flex-col flex-1 gap-[10px] md:gap-[20px]">
                   {colItems.map((proj, colItemIndex) => {
                     const i = proj.originalIndex;
                     const currentItemColIndex = i % cols;
