@@ -203,8 +203,8 @@ export function PortfolioView() {
           {selectedProject && (
             <div className="flex flex-col w-full bg-[#111111] min-h-screen">
               {selectedProject.detail_images && selectedProject.detail_images.length > 0 ? (
-                <div className="w-full flex justify-center">
-                 <div className="flex flex-col items-center w-full gap-[40px] pt-[150px] pb-[100px]">
+                 <div className="w-full flex justify-center">
+                 <div className="flex flex-col items-center w-full gap-[0px] pt-[150px] pb-[100px]">
                  <div className="flex flex-col items-center max-w-[900px] w-full px-[40px] text-center gap-[16px]">
                       <h2 className="text-[32px] md:text-[48px] font-[600] text-white tracking-[-1px]">
                         {selectedProject.title}
@@ -214,7 +214,7 @@ export function PortfolioView() {
                       </p>
                     </div>
                     {selectedProject.detail_images.map((imgUrl, idx) => (
-                      <div key={idx} className="w-full max-w-[1440px]">
+                      <div key={idx} className="w-full">
                         <img
                           className="w-full h-auto rounded-[8px] object-cover shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
                           src={imgUrl}
