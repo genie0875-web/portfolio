@@ -2,8 +2,8 @@ import { motion } from "motion/react";
 
 const dots = [
   { id: "section-01", num: "01", label: "Hello" },
-  { id: "section-02", num: "02", label: "Career" },
-  { id: "section-03", num: "03", label: "Portfolio" },
+  { id: "section-02", num: "02", label: "Portfolio" },
+  { id: "section-03", num: "03", label: "Career" },
   { id: "section-04", num: "04", label: "Contact" },
 ];
 

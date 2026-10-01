@@ -35,18 +35,17 @@ export function HomeView() {
       className="w-full h-[100dvh] overflow-y-auto overflow-x-hidden snap-y snap-mandatory bg-[#131313] scroll-smooth relative"
     >
       <VerticalNav activeSection={activeSection} />
-
+      
       <section id="section-01" className="home-section snap-start w-full h-[100dvh] relative flex flex-col justify-center px-0 md:px-[150px] md:-mt-[100px]">
         <HeroSection isActive={activeSection === "section-01"} />
       </section>
 
-      {/* 02 ↔ 03 교체: Portfolio를 Career보다 먼저 보여준다 */}
       <section id="section-02" className="home-section snap-start w-full h-[100dvh] relative flex flex-col justify-center px-0 md:px-[150px] md:-mt-[100px]">
-        <SelectedWorkSection isActive={activeSection === "section-02"} />
+        <CareerSection isActive={activeSection === "section-02"} />
       </section>
 
       <section id="section-03" className="home-section snap-start w-full h-[100dvh] relative flex flex-col justify-center px-0 md:px-[150px] md:-mt-[100px]">
-        <CareerSection isActive={activeSection === "section-03"} />
+        <SelectedWorkSection isActive={activeSection === "section-03"} />
       </section>
 
       {/* ✅ Contact: snap-start + min-h-[100dvh] */}
