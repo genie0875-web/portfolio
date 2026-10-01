@@ -8,11 +8,15 @@ const fadeUp = {
 };
 
 // 데스크탑 이미지 위치/크기 고정값 (레이아웃 유지)
+// 배열 순서 = 등록 순서(order_index). 앞 두 개를 가장 잘 보이는 자리에 고정한다.
+//  [0] 왼쪽 아래 큰 세로 카드  — 'Portfolio' 손글씨 아래라 안 가림
+//  [1] 왼쪽 끝 작은 가로 타일  — 라벨형 카드 자리 (가로 썸네일 필요)
+//  [2] 가운데 위 큰 세로 카드  — 손글씨와 겹치는 자리라 사진형이 어울림
 const desktopStyles = [
-  { width: 272, height: 378, left: 442, top: 140, zIndex: 5,  borderRadius: 20, delay: 0.2 },
-  { width: 272, height: 280, left: 744, top: 400, zIndex: 5,  borderRadius: 30, delay: 0.3 },
-  { width: 180, height: 110, left: 0,   top: 640, zIndex: 25, borderRadius: 15, delay: 0.4 },
-  { width: 272, height: 378, left: 140, top: 510, zIndex: 15, borderRadius: 20, delay: 0.5 },
+  { width: 272, height: 378, left: 140, top: 510, zIndex: 15, borderRadius: 20, delay: 0.2 },
+  { width: 180, height: 110, left: 0,   top: 640, zIndex: 25, borderRadius: 15, delay: 0.3 },
+  { width: 272, height: 378, left: 442, top: 140, zIndex: 5,  borderRadius: 20, delay: 0.4 },
+  { width: 272, height: 280, left: 744, top: 400, zIndex: 5,  borderRadius: 30, delay: 0.5 },
   { width: 272, height: 292, left: 442, top: 548, zIndex: 15, borderRadius: 20, delay: 0.6 },
 ];
 
@@ -134,7 +138,13 @@ export function SelectedWorkSection({ isActive }: { isActive: boolean }) {
           {portfolios.slice(0, 4).map((proj, idx) => (
             <motion.div
               key={proj.id}
-              className={`w-full ${idx < 2 ? "aspect-[176/239]" : "aspect-[175/184]"} rounded-[15px] overflow-hidden bg-[#222] cursor-pointer`}
+              className={`w-full ${
+                idx === 1
+                  ? "col-span-2 aspect-[360/148]"
+                  : idx === 0
+                  ? "aspect-[176/239]"
+                  : "aspect-[175/184]"
+              } rounded-[15px] overflow-hidden bg-[#222] cursor-pointer`}
               initial={{ opacity: 0, y: 40 }}
               animate={isActive ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
               transition={{ duration: 0.6, delay: 0.7 + idx * 0.1 }}
