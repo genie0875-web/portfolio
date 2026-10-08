@@ -6,6 +6,7 @@ export function AdminView() {
   const [description, setDescription] = useState("");
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [detailFiles, setDetailFiles] = useState<File[]>([]);
+  const [detailHtml, setDetailHtml] = useState("");
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [detailPreviews, setDetailPreviews] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -56,6 +57,7 @@ export function AdminView() {
         description: description.trim(),
         thumbnail_url: thumbnailUrl,
         detail_images: detailUrls,
+        detail_html: detailHtml.trim() || null,
       });
       if (insertError) throw new Error(insertError.message);
       setSuccess(`✅ "${title}" 등록 완료!`);
@@ -65,6 +67,7 @@ export function AdminView() {
       setThumbnailPreview(null);
       setDetailFiles([]);
       setDetailPreviews([]);
+      setDetailHtml("");
     } catch (err: any) {
       setError(`❌ ${err.message}`);
     } finally {
@@ -112,6 +115,21 @@ export function AdminView() {
               ))}
             </div>
           )}
+        </div>
+
+        <div style={{ marginBottom: 32 }}>
+          <label style={labelStyle}>상세 HTML (선택 · 입력하면 이미지 대신 이걸로 보여줍니다)</label>
+          <textarea
+            value={detailHtml}
+            onChange={(e) => setDetailHtml(e.target.value)}
+            placeholder="<!doctype html> 로 시작하는 완성된 HTML 한 벌을 붙여넣으세요"
+            rows={8}
+            spellCheck={false}
+            style={{ ...inputStyle, resize: "vertical", fontFamily: "ui-monospace, Menlo, monospace", fontSize: 12, lineHeight: 1.6 }}
+          />
+          <p style={{ fontSize: 12, color: "#888", marginTop: 6 }}>
+            비워두면 위의 상세 이미지가 그대로 쓰입니다.
+          </p>
         </div>
 
         {error && <div style={{ background: "#fff5f5", border: "1px solid #fc8181", borderRadius: 8, padding: "12px 16px", color: "#c53030", marginBottom: 16, fontSize: 14 }}>{error}</div>}

@@ -8,6 +8,7 @@ type Portfolio = {
   description: string;
   thumbnail_url: string;
   detail_images: string[];
+  detail_html?: string | null;
   category: string;
   order_index: number;
 };
@@ -37,6 +38,7 @@ export default function ManageView() {
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editCategory, setEditCategory] = useState("");
+  const [editDetailHtml, setEditDetailHtml] = useState("");
 
   // 썸네일: null = 기존 유지, "" = 삭제(교체 필요), File = 새 파일
   const [newThumbnailFile, setNewThumbnailFile] = useState<File | null>(null);
@@ -58,6 +60,7 @@ export default function ManageView() {
     setEditTitle(item.title);
     setEditDescription(item.description ?? "");
     setEditCategory(item.category ?? "");
+    setEditDetailHtml(item.detail_html ?? "");
     setNewThumbnailFile(null);
     setNewThumbnailPreview(null);
     setThumbnailCleared(false);
@@ -142,6 +145,7 @@ export default function ManageView() {
           category: editCategory,
           thumbnail_url: thumbnailUrl,
           detail_images: finalDetailImages,
+          detail_html: editDetailHtml.trim() || null,
         })
         .eq("id", editTarget.id);
 
@@ -364,6 +368,28 @@ export default function ManageView() {
                 onChange={handleDetailFilesChange}
               />
             </div>
+
+            {/* 상세 HTML */}
+            <label style={s.label}>상세 HTML</label>
+            <textarea
+              style={{
+                ...s.input,
+                height: 160,
+                resize: "vertical",
+                fontFamily: "ui-monospace, Menlo, monospace",
+                fontSize: 12,
+                lineHeight: 1.6,
+              }}
+              spellCheck={false}
+              value={editDetailHtml}
+              onChange={(e) => setEditDetailHtml(e.target.value)}
+              placeholder="<!doctype html> 로 시작하는 완성된 HTML 한 벌"
+            />
+            <p style={{ fontSize: 12, color: "#6b7280", margin: "6px 0 0 0" }}>
+              {editDetailHtml.trim()
+                ? `입력됨 · ${editDetailHtml.length.toLocaleString()}자 — 상세페이지는 이 HTML로 보입니다`
+                : "비워두면 위의 상세 이미지가 그대로 쓰입니다"}
+            </p>
 
             <div style={s.modalFooter}>
               <button style={s.cancelBtn} onClick={closeEdit}>취소</button>

@@ -3,6 +3,66 @@ import { motion } from "motion/react";
 import { useLocation } from "react-router";
 import { usePortfolios, Portfolio } from "../../hooks/usePortfolios";
 
+/**
+ * detail_html 이 있을 때 쓰는 렌더러.
+ * iframe(srcDoc)으로 띄워서 사이트의 Tailwind/전역 스타일과 섞이지 않게 격리하고,
+ * 내용 높이에 맞춰 iframe 높이를 자동으로 맞춘다.
+ */
+function HtmlDetail({ html }: { html: string }) {
+  const frameRef = useRef<HTMLIFrameElement>(null);
+  const [height, setHeight] = useState(900);
+
+  useEffect(() => {
+    const el = frameRef.current;
+    if (!el) return;
+    let ro: ResizeObserver | null = null;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    const fit = () => {
+      const doc = el.contentDocument;
+      if (!doc) return;
+      const h = Math.max(
+        doc.documentElement?.scrollHeight ?? 0,
+        doc.body?.scrollHeight ?? 0
+      );
+      if (h > 0) setHeight(h);
+    };
+
+    const onLoad = () => {
+      fit();
+      const doc = el.contentDocument;
+      if (doc?.documentElement) {
+        ro = new ResizeObserver(fit);
+        ro.observe(doc.documentElement);
+        doc.querySelectorAll("img").forEach((img) =>
+          img.addEventListener("load", fit)
+        );
+      }
+      // 웹폰트·이미지가 늦게 뜰 때를 위한 보정
+      [300, 900, 2000].forEach((ms) => timers.push(setTimeout(fit, ms)));
+    };
+
+    el.addEventListener("load", onLoad);
+    if (el.contentDocument?.readyState === "complete") onLoad();
+
+    return () => {
+      el.removeEventListener("load", onLoad);
+      ro?.disconnect();
+      timers.forEach(clearTimeout);
+    };
+  }, [html]);
+
+  return (
+    <iframe
+      ref={frameRef}
+      srcDoc={html}
+      title="project detail"
+      scrolling="no"
+      style={{ width: "100%", height, border: 0, display: "block" }}
+    />
+  );
+}
+
 export function PortfolioView() {
   const { portfolios, loading } = usePortfolios();
   const location = useLocation();
@@ -202,7 +262,9 @@ export function PortfolioView() {
         >
           {selectedProject && (
             <div className="flex flex-col w-full bg-[#111111] min-h-screen">
-              {selectedProject.detail_images && selectedProject.detail_images.length > 0 ? (
+              {(selectedProject as any).detail_html ? (
+                <HtmlDetail html={(selectedProject as any).detail_html as string} />
+              ) : selectedProject.detail_images && selectedProject.detail_images.length > 0 ? (
                  <div className="w-full flex justify-center">
                  <div className="flex flex-col items-center w-full gap-[0px] pt-[0px] pb-[100px]">
                     {selectedProject.detail_images.map((imgUrl, idx) => (
